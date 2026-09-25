@@ -172,8 +172,23 @@ class GcloudAccountCredentials(auth_credentials.Credentials):
 
 
 def get_credentials(account: str | None) -> auth_credentials.Credentials:
-  if account:
-    return GcloudAccountCredentials(account)
+  """Resolves credentials from --account or the active gcloud CLI account, falling back to ADC."""
+  resolved_account = account
+  if not resolved_account:
+    try:
+      active = subprocess.check_output(
+          ["gcloud", "config", "get-value", "account"],
+          stderr=subprocess.DEVNULL,
+          text=True,
+      ).strip()
+      if active and active != "(unset)":
+        resolved_account = active
+    except Exception:
+      pass
+
+  if resolved_account:
+    return GcloudAccountCredentials(resolved_account)
+
   creds, _ = google.auth.default()
   return creds
 

@@ -43,7 +43,9 @@ import json, sys
 data = json.loads(sys.stdin.read() or "{}")
 for job in data.get("batchPredictionJobs", []):
     if str(job.get("displayName", "")).startswith("genai-sdk-batch-sync-retry-"):
-        print(f"{job[\"name\"]}|{job.get(\"state\", \"\")}")
+        name = job.get("name", "")
+        state = job.get("state", "")
+        print(f"{name}|{state}")
 ' <<< "${JOBS_JSON}")"
 
 if [[ -z "${JOB_NAMES}" ]]; then
